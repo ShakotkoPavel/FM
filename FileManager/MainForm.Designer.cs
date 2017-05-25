@@ -36,6 +36,10 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.Exit = new System.Windows.Forms.ToolStripMenuItem();
             this.ControlPanel = new System.Windows.Forms.ToolStrip();
+            this.toolViewHiddenFiles = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolLarge = new System.Windows.Forms.ToolStripButton();
+            this.toolSmall = new System.Windows.Forms.ToolStripButton();
             this.toolList = new System.Windows.Forms.ToolStripButton();
             this.toolDetails = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
@@ -50,6 +54,7 @@
             this.Type = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.Size = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.imageFolders = new System.Windows.Forms.ImageList(this.components);
+            this.labelPathLeft = new System.Windows.Forms.Label();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
             this.driveRight = new System.Windows.Forms.ComboBox();
@@ -58,11 +63,6 @@
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.toolSmall = new System.Windows.Forms.ToolStripButton();
-            this.toolLarge = new System.Windows.Forms.ToolStripButton();
-            this.toolViewHiddenFiles = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.labelPathLeft = new System.Windows.Forms.Label();
             this.labelPathRight = new System.Windows.Forms.Label();
             this.MainMenu.SuspendLayout();
             this.ControlPanel.SuspendLayout();
@@ -138,6 +138,41 @@
             this.ControlPanel.TabIndex = 5;
             this.ControlPanel.Text = "toolStrip1";
             // 
+            // toolViewHiddenFiles
+            // 
+            this.toolViewHiddenFiles.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolViewHiddenFiles.Image = ((System.Drawing.Image)(resources.GetObject("toolViewHiddenFiles.Image")));
+            this.toolViewHiddenFiles.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolViewHiddenFiles.Name = "toolViewHiddenFiles";
+            this.toolViewHiddenFiles.Size = new System.Drawing.Size(23, 22);
+            this.toolViewHiddenFiles.Text = "Показать скрытые файлы";
+            this.toolViewHiddenFiles.Click += new System.EventHandler(this.toolViewHiddenFiles_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
+            // 
+            // toolLarge
+            // 
+            this.toolLarge.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolLarge.Image = ((System.Drawing.Image)(resources.GetObject("toolLarge.Image")));
+            this.toolLarge.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolLarge.Name = "toolLarge";
+            this.toolLarge.Size = new System.Drawing.Size(23, 22);
+            this.toolLarge.Text = "Крупные значки";
+            this.toolLarge.Click += new System.EventHandler(this.toolLarge_Click);
+            // 
+            // toolSmall
+            // 
+            this.toolSmall.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolSmall.Image = ((System.Drawing.Image)(resources.GetObject("toolSmall.Image")));
+            this.toolSmall.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolSmall.Name = "toolSmall";
+            this.toolSmall.Size = new System.Drawing.Size(23, 22);
+            this.toolSmall.Text = "Мелкие значки";
+            this.toolSmall.Click += new System.EventHandler(this.toolSmall_Click);
+            // 
             // toolList
             // 
             this.toolList.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -166,7 +201,7 @@
             // RunNoterpad
             // 
             this.RunNoterpad.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.RunNoterpad.Image = global::FileManager.Properties.Resources.edit_1783;
+            this.RunNoterpad.Image = global::FileFoxManager.Properties.Resources.edit_1783;
             this.RunNoterpad.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.RunNoterpad.Name = "RunNoterpad";
             this.RunNoterpad.Size = new System.Drawing.Size(23, 22);
@@ -245,6 +280,8 @@
             // 
             // listLeft
             // 
+            this.listLeft.AllowColumnReorder = true;
+            this.listLeft.AllowDrop = true;
             this.listLeft.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.FileName,
             this.Type,
@@ -255,6 +292,7 @@
             this.listLeft.GridLines = true;
             this.listLeft.Location = new System.Drawing.Point(3, 56);
             this.listLeft.Name = "listLeft";
+            this.listLeft.ShowItemToolTips = true;
             this.listLeft.Size = new System.Drawing.Size(436, 430);
             this.listLeft.SmallImageList = this.imageFolders;
             this.listLeft.TabIndex = 1;
@@ -284,6 +322,18 @@
             this.imageFolders.Images.SetKeyName(1, "folder_locked_1187.png");
             this.imageFolders.Images.SetKeyName(2, "unknown_3264.png");
             this.imageFolders.Images.SetKeyName(3, "file_locked_1916.png");
+            // 
+            // labelPathLeft
+            // 
+            this.labelPathLeft.AutoSize = true;
+            this.labelPathLeft.BackColor = System.Drawing.SystemColors.InactiveCaption;
+            this.labelPathLeft.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.labelPathLeft.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.labelPathLeft.Location = new System.Drawing.Point(3, 33);
+            this.labelPathLeft.Name = "labelPathLeft";
+            this.labelPathLeft.Size = new System.Drawing.Size(436, 20);
+            this.labelPathLeft.TabIndex = 2;
+            this.labelPathLeft.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // tableLayoutPanel3
             // 
@@ -370,56 +420,10 @@
             this.columnHeader3.Text = "Размер";
             this.columnHeader3.Width = 142;
             // 
-            // toolSmall
-            // 
-            this.toolSmall.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolSmall.Image = ((System.Drawing.Image)(resources.GetObject("toolSmall.Image")));
-            this.toolSmall.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolSmall.Name = "toolSmall";
-            this.toolSmall.Size = new System.Drawing.Size(23, 22);
-            this.toolSmall.Text = "Мелкие значки";
-            this.toolSmall.Click += new System.EventHandler(this.toolSmall_Click);
-            // 
-            // toolLarge
-            // 
-            this.toolLarge.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolLarge.Image = ((System.Drawing.Image)(resources.GetObject("toolLarge.Image")));
-            this.toolLarge.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolLarge.Name = "toolLarge";
-            this.toolLarge.Size = new System.Drawing.Size(23, 22);
-            this.toolLarge.Text = "Крупные значки";
-            this.toolLarge.Click += new System.EventHandler(this.toolLarge_Click);
-            // 
-            // toolViewHiddenFiles
-            // 
-            this.toolViewHiddenFiles.CheckOnClick = true;
-            this.toolViewHiddenFiles.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolViewHiddenFiles.Image = ((System.Drawing.Image)(resources.GetObject("toolViewHiddenFiles.Image")));
-            this.toolViewHiddenFiles.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolViewHiddenFiles.Name = "toolViewHiddenFiles";
-            this.toolViewHiddenFiles.Size = new System.Drawing.Size(23, 22);
-            this.toolViewHiddenFiles.Text = "Показать скрытые файлы";
-            this.toolViewHiddenFiles.Click += new System.EventHandler(this.toolViewHiddenFiles_Click);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
-            // 
-            // labelPathLeft
-            // 
-            this.labelPathLeft.AutoSize = true;
-            this.labelPathLeft.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.labelPathLeft.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.labelPathLeft.Location = new System.Drawing.Point(3, 33);
-            this.labelPathLeft.Name = "labelPathLeft";
-            this.labelPathLeft.Size = new System.Drawing.Size(436, 20);
-            this.labelPathLeft.TabIndex = 2;
-            this.labelPathLeft.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
             // labelPathRight
             // 
             this.labelPathRight.AutoSize = true;
+            this.labelPathRight.BackColor = System.Drawing.SystemColors.InactiveCaption;
             this.labelPathRight.Dock = System.Windows.Forms.DockStyle.Fill;
             this.labelPathRight.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.labelPathRight.Location = new System.Drawing.Point(3, 33);
@@ -476,15 +480,11 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.ComboBox driveLeft;
-        private System.Windows.Forms.ListView listLeft;
         private System.Windows.Forms.Label infoDriveLeft;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel4;
         private System.Windows.Forms.ComboBox driveRight;
         private System.Windows.Forms.Label infoDriveRight;
-        private System.Windows.Forms.ColumnHeader FileName;
-        private System.Windows.Forms.ColumnHeader Type;
-        private System.Windows.Forms.ColumnHeader Size;
         private System.Windows.Forms.ImageList imageFolders;
         private System.Windows.Forms.ToolStripButton toolDetails;
         private System.Windows.Forms.ToolStripButton toolList;
@@ -498,6 +498,10 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.Label labelPathLeft;
         private System.Windows.Forms.Label labelPathRight;
+        private System.Windows.Forms.ListView listLeft;
+        private System.Windows.Forms.ColumnHeader FileName;
+        private System.Windows.Forms.ColumnHeader Type;
+        private System.Windows.Forms.ColumnHeader Size;
     }
 }
 

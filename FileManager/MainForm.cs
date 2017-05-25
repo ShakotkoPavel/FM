@@ -15,14 +15,17 @@ namespace FileManager
     public partial class MainForm : Form
     {
         public DriveInfo[] arrayDrivesInfo;
-        public string leftPath = "*.*";
-        public string rightPath = "*.*";
+        public string leftPath;
+        public string rightPath;
+        public bool statusShowHiddenLeft = false;   //отображаються или нет скрытые файлы
+        public bool statusShowHiddenRight = false;
 
         public MainForm()
         {
             InitializeComponent();
             arrayDrivesInfo = DriveInfo.GetDrives();
         }
+
         private void toolStripNoterpad_Click(object sender, EventArgs e)
         {
             string path = @"C:\Windows\System32\notepad.exe";
@@ -61,9 +64,8 @@ namespace FileManager
         {
             DriveInfo driveInfo = (DriveInfo)arrayDrivesInfo.GetValue(((ComboBox)sender).SelectedIndex);
             leftPath = driveInfo.RootDirectory.FullName;
-            labelPathLeft.Text = leftPath;
 
-            ShowInformation(driveLeft, driveInfo, infoDriveLeft, listLeft, leftPath);
+            ShowInformation(driveLeft, driveInfo, infoDriveLeft, listLeft, leftPath, labelPathLeft, statusShowHiddenLeft);
         }
 
         private void driveRight_SelectionChangeCommitted(object sender, EventArgs e)
@@ -72,22 +74,24 @@ namespace FileManager
             rightPath = driveInfo.RootDirectory.FullName;
             labelPathRight.Text = rightPath;
 
-            ShowInformation(driveRight, driveInfo, infoDriveRight, listRight, rightPath);
+            ShowInformation(driveRight, driveInfo, infoDriveRight, listRight, rightPath, labelPathRight, statusShowHiddenRight);
         }
 
-        private void ShowInformation(ComboBox cbDrive, DriveInfo driveInfo, Label infoDrive, ListView list, string path)
+        private void ShowInformation(ComboBox cbDrive, DriveInfo driveInfo, Label infoDrive, ListView list, string path, Label pathLabel, bool showHidden)
         {
             if (driveInfo.IsReady)
             {
                 ShowInfoOfSpace(infoDrive, driveInfo);
-                ShowFolders(list, path, driveInfo, false);
-                ShowFiles(list, path, driveInfo, false);
+                ShowFolders(list, path, showHidden, pathLabel);
+                ShowFiles(list, path, showHidden);
             }
             else
             {
-                MessageBox.Show("Устройство не готово! \nВыберите другое устройство", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                cbDrive.SelectedIndex = -1;
+                list.Items.Clear();
                 infoDrive.Text = String.Empty;
+                pathLabel.Text = String.Empty;
+                cbDrive.SelectedIndex = -1;
+                MessageBox.Show("Устройство не готово! \nВыберите другое устройство", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -98,49 +102,63 @@ namespace FileManager
                                                     + " Мб из " + GetMegabyteToString(driveInfo.TotalSize) + " Мб";
         }
 
-        private void ShowFolders(ListView list, string path, DriveInfo driveInfo, bool showHiddenAndSystem)
+        private void ShowFolders(ListView list, string path, bool showHiddenAndSystem, Label pathLabel)
         {
+            pathLabel.Text = path;
             list.Items.Clear();
 
             DirectoryInfo dirInfo = new DirectoryInfo(path);
-            foreach (DirectoryInfo dir in dirInfo.GetDirectories())
+            DirectoryInfo[] directories = dirInfo.GetDirectories();
+
+            foreach (DirectoryInfo dir in directories)
             {
-                if((dir.Attributes.HasFlag(FileAttributes.Hidden) | dir.Attributes.HasFlag(FileAttributes.System)) == showHiddenAndSystem)
+                if(showHiddenAndSystem || !(dir.Attributes.HasFlag(FileAttributes.Hidden) | dir.Attributes.HasFlag(FileAttributes.System)))
                 {
-                    ListViewItem lvi = new ListViewItem();
-                    ListViewItem.ListViewSubItem size = new ListViewItem.ListViewSubItem();
-                    lvi.Text = dir.Name;
-                    lvi.ForeColor = dir.Attributes.HasFlag(FileAttributes.Hidden) ? SystemColors.ControlDark : SystemColors.WindowText;
-                    lvi.ImageIndex = dir.Attributes.HasFlag(FileAttributes.System) ? 1 : 0;
-                    size.Text = "<папка>";
-                    lvi.SubItems.Add(size);
-                    list.Items.Add(lvi);
+                    addFolderToList(dir, list);
                 }
             }
         }
 
-        private void ShowFiles(ListView list, string path, DriveInfo driveInfo, bool showHiddenAndSystem)
+        private void ShowFiles(ListView list, string path, bool showHiddenAndSystem)
         {
             DirectoryInfo dirInfo = new DirectoryInfo(path);
            
             foreach (FileInfo file in dirInfo.GetFiles())
             {
-                if ((file.Attributes.HasFlag(FileAttributes.Hidden) | file.Attributes.HasFlag(FileAttributes.System)) == showHiddenAndSystem)
+                if (showHiddenAndSystem || !(file.Attributes.HasFlag(FileAttributes.Hidden) | file.Attributes.HasFlag(FileAttributes.System)))
                 {
-                    ListViewItem lvi = new ListViewItem();
-                    ListViewItem.ListViewSubItem type = new ListViewItem.ListViewSubItem();
-                    ListViewItem.ListViewSubItem size = new ListViewItem.ListViewSubItem();
-                    lvi.Text = Path.GetFileNameWithoutExtension(file.Name);
-                    lvi.ForeColor = file.Attributes.HasFlag(FileAttributes.Hidden) ? SystemColors.ControlDark : SystemColors.WindowText;
-                    lvi.ImageIndex = file.Attributes.HasFlag(FileAttributes.System) ? 3 : 2;
-                    type.Text = file.Extension;
-                    size.Text = GetMegabyteToString(file.Length) + " Mб";
-                    lvi.SubItems.Add(type);
-                    lvi.SubItems.Add(size);
-                    list.Items.Add(lvi);
+                    addFileToList(file, list);
                 }
             }
         }
+
+        private void addFolderToList(DirectoryInfo dir, ListView list)
+        {
+            ListViewItem lvi = new ListViewItem();
+            ListViewItem.ListViewSubItem size = new ListViewItem.ListViewSubItem();
+            lvi.Text = dir.Name;
+            lvi.ForeColor = dir.Attributes.HasFlag(FileAttributes.Hidden) ? SystemColors.ControlDark : SystemColors.WindowText;
+            lvi.ImageIndex = dir.Attributes.HasFlag(FileAttributes.System) ? 1 : 0;
+            size.Text = "<папка>";
+            lvi.SubItems.Add(size);
+            list.Items.Add(lvi);
+        }
+
+        private void addFileToList(FileInfo file, ListView list)
+        {
+            ListViewItem lvi = new ListViewItem();
+            ListViewItem.ListViewSubItem type = new ListViewItem.ListViewSubItem();
+            ListViewItem.ListViewSubItem size = new ListViewItem.ListViewSubItem();
+            lvi.Text = Path.GetFileNameWithoutExtension(file.Name);
+            lvi.ForeColor = file.Attributes.HasFlag(FileAttributes.Hidden) ? SystemColors.ControlDark : SystemColors.WindowText;
+            lvi.ImageIndex = file.Attributes.HasFlag(FileAttributes.System) ? 3 : 2;
+            type.Text = file.Extension;
+            size.Text = GetMegabyteToString(file.Length) + " Mб";
+            lvi.SubItems.Add(type);
+            lvi.SubItems.Add(size);
+            list.Items.Add(lvi);
+        }
+
         private string GetMegabyteToString(long bytes)
         {
             return string.Format("{0:N0}", bytes / 1024 / 1024);
@@ -185,7 +203,22 @@ namespace FileManager
 
         private void toolViewHiddenFiles_Click(object sender, EventArgs e)
         {
-
+            if (listLeft.SelectedItems.Count > 0)
+            {
+                //int indItem = listLeft.SelectedItems[0].Index;  //запомнить индекс первого выделленного элемента
+                statusShowHiddenLeft = !statusShowHiddenLeft;
+                ShowFolders(listLeft, leftPath, statusShowHiddenLeft, labelPathLeft);
+                ShowFiles(listLeft, leftPath, statusShowHiddenLeft);
+                //listLeft.Items[indItem].Selected = true;
+            }
+            else if (listRight.SelectedItems.Count > 0)
+            {
+                //int indItem = listRight.SelectedItems[0].Index;  //запомнить индекс первого выделленного элемента
+                statusShowHiddenRight = !statusShowHiddenRight;
+                ShowFolders(listRight, rightPath, statusShowHiddenRight, labelPathRight);
+                ShowFiles(listRight, rightPath, statusShowHiddenRight);
+                //listRight.Items[indItem].Selected = true;
+            }
         }
     }
 }
