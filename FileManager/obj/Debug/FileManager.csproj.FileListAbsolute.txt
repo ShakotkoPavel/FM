@@ -1,0 +1,17 @@
+D:\Работа\C#\Projects\FileManager\FileManager\FileManager\bin\Debug\FileManager.exe.config
+D:\Работа\C#\Projects\FileManager\FileManager\FileManager\bin\Debug\FileManager.exe
+D:\Работа\C#\Projects\FileManager\FileManager\FileManager\bin\Debug\FileManager.pdb
+D:\Работа\C#\Projects\FileManager\FileManager\FileManager\obj\Debug\FileManager.MainForm.resources
+D:\Работа\C#\Projects\FileManager\FileManager\FileManager\obj\Debug\FileManager.Properties.Resources.resources
+D:\Работа\C#\Projects\FileManager\FileManager\FileManager\obj\Debug\FileManager.csproj.GenerateResource.Cache
+D:\Работа\C#\Projects\FileManager\FileManager\FileManager\obj\Debug\FileManager.exe
+D:\Работа\C#\Projects\FileManager\FileManager\FileManager\obj\Debug\FileManager.pdb
+D:\Работа\C#\Projects\FileManager\FileManager\FileManager\obj\Debug\FileManager.csprojResolveAssemblyReference.cache
+C:\VS\FileManager\FileManager\bin\Debug\FileManager.exe.config
+C:\VS\FileManager\FileManager\bin\Debug\FileManager.exe
+C:\VS\FileManager\FileManager\bin\Debug\FileManager.pdb
+C:\VS\FileManager\FileManager\obj\Debug\FileManager.MainForm.resources
+C:\VS\FileManager\FileManager\obj\Debug\FileManager.Properties.Resources.resources
+C:\VS\FileManager\FileManager\obj\Debug\FileManager.csproj.GenerateResource.Cache
+C:\VS\FileManager\FileManager\obj\Debug\FileManager.exe
+C:\VS\FileManager\FileManager\obj\Debug\FileManager.pdb
