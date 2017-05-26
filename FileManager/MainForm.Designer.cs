@@ -217,10 +217,12 @@
             // splitContainer1.Panel1
             // 
             this.splitContainer1.Panel1.Controls.Add(this.tableLayoutPanel2);
+            this.splitContainer1.Panel1.RightToLeft = System.Windows.Forms.RightToLeft.No;
             // 
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.tableLayoutPanel3);
+            this.splitContainer1.Panel2.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.splitContainer1.Size = new System.Drawing.Size(887, 512);
             this.splitContainer1.SplitterDistance = 442;
             this.splitContainer1.SplitterWidth = 1;
@@ -322,9 +324,11 @@
             this.imageFolders.Images.SetKeyName(1, "folder_locked_1187.png");
             this.imageFolders.Images.SetKeyName(2, "unknown_3264.png");
             this.imageFolders.Images.SetKeyName(3, "file_locked_1916.png");
+            this.imageFolders.Images.SetKeyName(4, "up_8316.png");
             // 
             // labelPathLeft
             // 
+            this.labelPathLeft.AutoEllipsis = true;
             this.labelPathLeft.AutoSize = true;
             this.labelPathLeft.BackColor = System.Drawing.SystemColors.InactiveCaption;
             this.labelPathLeft.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -437,6 +441,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
+            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.ClientSize = new System.Drawing.Size(887, 561);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.ControlPanel);
@@ -444,6 +449,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.MainMenu;
             this.Name = "MainForm";
+            this.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.Text = "FileFox Manager";
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.MainMenu.ResumeLayout(false);

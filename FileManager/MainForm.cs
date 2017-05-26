@@ -26,31 +26,6 @@ namespace FileManager
             arrayDrivesInfo = DriveInfo.GetDrives();
         }
 
-        private void toolStripNoterpad_Click(object sender, EventArgs e)
-        {
-            string path = @"C:\Windows\System32\notepad.exe";
-            try
-            {
-                if (File.Exists(path))
-                {
-                    Process.Start(path);
-                }
-                else
-                {
-                    throw new FileNotFoundException("File not found!", path);
-                }
-            }
-            catch(FileNotFoundException ex)
-            {
-                MessageBox.Show(ex.Message + "\n" + ex.FileName, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void Exit_Click(object sender, EventArgs e)
-        {
-            this.Close();
-        }
-
         private void MainForm_Load(object sender, EventArgs e)
         {
            foreach(DriveInfo drive in arrayDrivesInfo)
@@ -64,7 +39,6 @@ namespace FileManager
         {
             DriveInfo driveInfo = (DriveInfo)arrayDrivesInfo.GetValue(((ComboBox)sender).SelectedIndex);
             leftPath = driveInfo.RootDirectory.FullName;
-
             ShowInformation(driveLeft, driveInfo, infoDriveLeft, listLeft, leftPath, labelPathLeft, statusShowHiddenLeft);
         }
 
@@ -82,8 +56,7 @@ namespace FileManager
             if (driveInfo.IsReady)
             {
                 ShowInfoOfSpace(infoDrive, driveInfo);
-                ShowFolders(list, path, showHidden, pathLabel);
-                ShowFiles(list, path, showHidden);
+                ShowFoldersAndFiles(list, path, showHidden, pathLabel);
             }
             else
             {
@@ -98,37 +71,38 @@ namespace FileManager
         private void ShowInfoOfSpace(Label label, DriveInfo driveInfo)
         {
             string volumeLabel = driveInfo.VolumeLabel != String.Empty ? $"[{driveInfo.VolumeLabel}]" : "[_нет_]";
-            label.Text = volumeLabel + $"\t свободно " + GetMegabyteToString(driveInfo.TotalFreeSpace)
-                                                    + " Мб из " + GetMegabyteToString(driveInfo.TotalSize) + " Мб";
+            label.Text = volumeLabel + $"\t свободно " + GetKbytesToString(driveInfo.TotalFreeSpace)
+                                                    + " Kб из " + GetKbytesToString(driveInfo.TotalSize) + " Kб";
         }
 
-        private void ShowFolders(ListView list, string path, bool showHiddenAndSystem, Label pathLabel)
+        private void ShowFoldersAndFiles(ListView list, string path, bool showHiddenAndSystem, Label pathLabel)
         {
-            pathLabel.Text = path;
-            list.Items.Clear();
-
-            DirectoryInfo dirInfo = new DirectoryInfo(path);
-            DirectoryInfo[] directories = dirInfo.GetDirectories();
-
-            foreach (DirectoryInfo dir in directories)
+            try
             {
-                if(showHiddenAndSystem || !(dir.Attributes.HasFlag(FileAttributes.Hidden) | dir.Attributes.HasFlag(FileAttributes.System)))
+                DirectoryInfo dirInfo = new DirectoryInfo(path);
+                DirectoryInfo[] directories = dirInfo.GetDirectories();
+                FileInfo[] files = dirInfo.GetFiles();
+                pathLabel.Text = path;
+                leftPath = path;
+                list.Items.Clear();
+                foreach (DirectoryInfo dir in directories)
                 {
-                    addFolderToList(dir, list);
+                    if (showHiddenAndSystem || !(dir.Attributes.HasFlag(FileAttributes.Hidden) | dir.Attributes.HasFlag(FileAttributes.System)))
+                    {
+                        addFolderToList(dir, list);
+                    }
+                }
+                foreach (FileInfo file in files)
+                {
+                    if (showHiddenAndSystem || !(file.Attributes.HasFlag(FileAttributes.Hidden) | file.Attributes.HasFlag(FileAttributes.System)))
+                    {
+                        addFileToList(file, list);
+                    }
                 }
             }
-        }
-
-        private void ShowFiles(ListView list, string path, bool showHiddenAndSystem)
-        {
-            DirectoryInfo dirInfo = new DirectoryInfo(path);
-           
-            foreach (FileInfo file in dirInfo.GetFiles())
+            catch (UnauthorizedAccessException ex)
             {
-                if (showHiddenAndSystem || !(file.Attributes.HasFlag(FileAttributes.Hidden) | file.Attributes.HasFlag(FileAttributes.System)))
-                {
-                    addFileToList(file, list);
-                }
+                MessageBox.Show(ex.Message, "Error!", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -153,20 +127,40 @@ namespace FileManager
             lvi.ForeColor = file.Attributes.HasFlag(FileAttributes.Hidden) ? SystemColors.ControlDark : SystemColors.WindowText;
             lvi.ImageIndex = file.Attributes.HasFlag(FileAttributes.System) ? 3 : 2;
             type.Text = file.Extension;
-            size.Text = GetMegabyteToString(file.Length) + " Mб";
+            size.Text = GetKbytesToString(file.Length) + " Kб";
             lvi.SubItems.Add(type);
             lvi.SubItems.Add(size);
             list.Items.Add(lvi);
         }
 
-        private string GetMegabyteToString(long bytes)
+        private string GetKbytesToString(long bytes)
         {
-            return string.Format("{0:N0}", bytes / 1024 / 1024);
+            return string.Format("{0:N0}", bytes / 1024);
         }
 
+        private void ChangeListView(View view)
+        {
+            if (listLeft.Focused)
+            {
+                listLeft.View = view;
+            }
+            else if (listRight.Focused)
+            {
+                listRight.View = view;
+            }
+        }
+
+        //Click`s
         private void listLeft_DoubleClick(object sender, EventArgs e)
         {
-
+            if (Directory.Exists(Path.Combine(leftPath, ((ListView)sender).FocusedItem.Text)))
+            {
+                ShowFoldersAndFiles(listLeft, Path.Combine(leftPath, ((ListView)sender).FocusedItem.Text), statusShowHiddenLeft, labelPathLeft);
+            }
+            else if (File.Exists(Path.Combine(leftPath, ((ListView)sender).FocusedItem.Text) + listLeft.FocusedItem.SubItems[1].Text))
+            {
+                Process.Start(Path.Combine(leftPath, ((ListView)sender).FocusedItem.Text) + listLeft.FocusedItem.SubItems[1].Text);
+            }
         }
 
         private void toolDetails_Click(object sender, EventArgs e)
@@ -189,35 +183,42 @@ namespace FileManager
             ChangeListView(View.LargeIcon);
         }
 
-        private void ChangeListView(View view)
+        private void toolViewHiddenFiles_Click(object sender, EventArgs e)
         {
-            if (listLeft.SelectedItems.Count > 0)
+            if (listLeft.Focused)
             {
-                listLeft.View = view;
+                statusShowHiddenLeft = !statusShowHiddenLeft;
+                ShowFoldersAndFiles(listLeft, leftPath, statusShowHiddenLeft, labelPathLeft);
             }
-            else if (listRight.SelectedItems.Count > 0)
+            if (listRight.Focused)
             {
-                listRight.View = view;
+                statusShowHiddenRight = !statusShowHiddenRight;
+                ShowFoldersAndFiles(listRight, rightPath, statusShowHiddenRight, labelPathRight);
             }
         }
 
-        private void toolViewHiddenFiles_Click(object sender, EventArgs e)
+        private void Exit_Click(object sender, EventArgs e)
         {
-            if (listLeft.SelectedItems.Count > 0)
+            this.Close();
+        }
+
+        private void toolStripNoterpad_Click(object sender, EventArgs e)
+        {
+            string path = @"C:\Windows\System32\notepad.exe";
+            try
             {
-                //int indItem = listLeft.SelectedItems[0].Index;  //запомнить индекс первого выделленного элемента
-                statusShowHiddenLeft = !statusShowHiddenLeft;
-                ShowFolders(listLeft, leftPath, statusShowHiddenLeft, labelPathLeft);
-                ShowFiles(listLeft, leftPath, statusShowHiddenLeft);
-                //listLeft.Items[indItem].Selected = true;
+                if (File.Exists(path))
+                {
+                    Process.Start(path);
+                }
+                else
+                {
+                    throw new FileNotFoundException("File not found!", path);
+                }
             }
-            else if (listRight.SelectedItems.Count > 0)
+            catch (FileNotFoundException ex)
             {
-                //int indItem = listRight.SelectedItems[0].Index;  //запомнить индекс первого выделленного элемента
-                statusShowHiddenRight = !statusShowHiddenRight;
-                ShowFolders(listRight, rightPath, statusShowHiddenRight, labelPathRight);
-                ShowFiles(listRight, rightPath, statusShowHiddenRight);
-                //listRight.Items[indItem].Selected = true;
+                MessageBox.Show(ex.Message + "\n" + ex.FileName, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
