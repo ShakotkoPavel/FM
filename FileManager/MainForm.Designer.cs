@@ -32,7 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.MainMenu = new System.Windows.Forms.MenuStrip();
             this.файлыToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.открытьToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fileOpen = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.Exit = new System.Windows.Forms.ToolStripMenuItem();
             this.ControlPanel = new System.Windows.Forms.ToolStrip();
@@ -40,7 +40,6 @@
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.toolViewHiddenFiles = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripRAR = new System.Windows.Forms.ToolStripButton();
             this.toolStripZIP = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.toolLarge = new System.Windows.Forms.ToolStripButton();
@@ -94,7 +93,7 @@
             // файлыToolStripMenuItem
             // 
             this.файлыToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.открытьToolStripMenuItem,
+            this.fileOpen,
             this.toolStripSeparator1,
             this.Exit});
             this.файлыToolStripMenuItem.Name = "файлыToolStripMenuItem";
@@ -102,12 +101,13 @@
             this.файлыToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
             this.файлыToolStripMenuItem.Text = "Файл";
             // 
-            // открытьToolStripMenuItem
+            // fileOpen
             // 
-            this.открытьToolStripMenuItem.Name = "открытьToolStripMenuItem";
-            this.открытьToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.открытьToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
-            this.открытьToolStripMenuItem.Text = "Открыть";
+            this.fileOpen.Name = "fileOpen";
+            this.fileOpen.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.fileOpen.Size = new System.Drawing.Size(164, 22);
+            this.fileOpen.Text = "Открыть";
+            this.fileOpen.Click += new System.EventHandler(this.fileOpen_Click);
             // 
             // toolStripSeparator1
             // 
@@ -133,7 +133,6 @@
             this.toolStripSeparator5,
             this.toolViewHiddenFiles,
             this.toolStripSeparator4,
-            this.toolStripRAR,
             this.toolStripZIP,
             this.toolStripSeparator3,
             this.toolLarge,
@@ -179,16 +178,6 @@
             this.toolStripSeparator4.Name = "toolStripSeparator4";
             this.toolStripSeparator4.Size = new System.Drawing.Size(6, 31);
             // 
-            // toolStripRAR
-            // 
-            this.toolStripRAR.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripRAR.Image = ((System.Drawing.Image)(resources.GetObject("toolStripRAR.Image")));
-            this.toolStripRAR.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripRAR.Name = "toolStripRAR";
-            this.toolStripRAR.Size = new System.Drawing.Size(28, 28);
-            this.toolStripRAR.Text = "Создать\\извлечь архив RAR";
-            this.toolStripRAR.Click += new System.EventHandler(this.toolStripRAR_Click);
-            // 
             // toolStripZIP
             // 
             this.toolStripZIP.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -197,6 +186,7 @@
             this.toolStripZIP.Name = "toolStripZIP";
             this.toolStripZIP.Size = new System.Drawing.Size(28, 28);
             this.toolStripZIP.Text = "Создать\\извлечь архив ZIP";
+            this.toolStripZIP.Click += new System.EventHandler(this.toolStripZIP_Click);
             // 
             // toolStripSeparator3
             // 
@@ -342,6 +332,7 @@
             this.leftList.ForeColor = System.Drawing.SystemColors.WindowText;
             this.leftList.FullRowSelect = true;
             this.leftList.GridLines = true;
+            this.leftList.HideSelection = false;
             this.leftList.Location = new System.Drawing.Point(3, 56);
             this.leftList.Name = "leftList";
             this.leftList.ShowItemToolTips = true;
@@ -351,6 +342,7 @@
             this.leftList.UseCompatibleStateImageBehavior = false;
             this.leftList.View = System.Windows.Forms.View.Details;
             this.leftList.DoubleClick += new System.EventHandler(this.listLeft_DoubleClick);
+            this.leftList.KeyDown += new System.Windows.Forms.KeyEventHandler(this.leftList_KeyDown);
             // 
             // FileName
             // 
@@ -460,6 +452,7 @@
             this.rightList.UseCompatibleStateImageBehavior = false;
             this.rightList.View = System.Windows.Forms.View.Details;
             this.rightList.DoubleClick += new System.EventHandler(this.rightList_DoubleClick);
+            this.rightList.KeyDown += new System.Windows.Forms.KeyEventHandler(this.rightList_KeyDown);
             // 
             // columnHeader1
             // 
@@ -527,7 +520,7 @@
         #endregion
         private System.Windows.Forms.MenuStrip MainMenu;
         private System.Windows.Forms.ToolStripMenuItem файлыToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem открытьToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fileOpen;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem Exit;
         private System.Windows.Forms.ToolStrip ControlPanel;
@@ -559,7 +552,6 @@
         private System.Windows.Forms.ColumnHeader FileName;
         private System.Windows.Forms.ColumnHeader Type;
         private System.Windows.Forms.ColumnHeader Size;
-        private System.Windows.Forms.ToolStripButton toolStripRAR;
         private System.Windows.Forms.ToolStripButton toolStripZIP;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripButton toolStripRefresh;

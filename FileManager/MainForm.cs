@@ -9,14 +9,15 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 
 namespace FileManager
 {
     public partial class MainForm : Form
     {
-        public DriveInfo[] arrayDrivesInfo;
-        public bool leftStatusShowHidden = false;   //отображаються или нет скрытые файлы
-        public bool rightStatusShowHidden = false;
+        private DriveInfo[] arrayDrivesInfo;
+        private bool leftStatusShowHidden = false;   //отображаються или нет скрытые файлы
+        private bool rightStatusShowHidden = false;
 
         public MainForm()
         {
@@ -49,6 +50,7 @@ namespace FileManager
             ShowInformation(driveRight, driveInfo, infoDriveRight, rightList, labelPathRight.Text, labelPathRight, rightStatusShowHidden);
         }
 
+        //+++ Common methods
         private void ShowInformation(ComboBox cbDrive, DriveInfo driveInfo, Label infoDrive, ListView list, string path, Label pathLabel, bool showHidden)
         {
             if (driveInfo.IsReady)
@@ -81,23 +83,23 @@ namespace FileManager
                 DirectoryInfo[] directories = dirInfo.GetDirectories();
                 FileInfo[] files = dirInfo.GetFiles();
                 list.Items.Clear();
-                if(path != Directory.GetDirectoryRoot(path)) //добавляем root-овую директорию если это не самый корень
+                if (path != Directory.GetDirectoryRoot(path)) //добавляем root-овую директорию если это не самый корень
                 {
-                    addRootDirectory(list);
+                    AddRootDirectory(list);
                 }
                 pathLabel.Text = path;
                 foreach (DirectoryInfo dir in directories)
                 {
                     if (showHiddenAndSystem || !(dir.Attributes.HasFlag(FileAttributes.Hidden) | dir.Attributes.HasFlag(FileAttributes.System)))
                     {
-                        addFolderToList(dir, list);
+                        AddFolderToList(dir, list);
                     }
                 }
                 foreach (FileInfo file in files)
                 {
                     if (showHiddenAndSystem || !(file.Attributes.HasFlag(FileAttributes.Hidden) | file.Attributes.HasFlag(FileAttributes.System)))
                     {
-                        addFileToList(file, list);
+                        AddFileToList(file, list);
                     }
                 }
             }
@@ -107,7 +109,7 @@ namespace FileManager
             }
         }
 
-        private void addFolderToList(DirectoryInfo dir, ListView list)
+        private void AddFolderToList(DirectoryInfo dir, ListView list)
         {
             ListViewItem lvi = new ListViewItem();
             ListViewItem.ListViewSubItem size = new ListViewItem.ListViewSubItem();
@@ -119,7 +121,7 @@ namespace FileManager
             list.Items.Add(lvi);
         }
 
-        private void addFileToList(FileInfo file, ListView list)
+        private void AddFileToList(FileInfo file, ListView list)
         {
             ListViewItem lvi = new ListViewItem();
             ListViewItem.ListViewSubItem type = new ListViewItem.ListViewSubItem();
@@ -151,7 +153,7 @@ namespace FileManager
             }
         }
 
-        private void addRootDirectory(ListView list)
+        private void AddRootDirectory(ListView list)
         {
             ListViewItem lvi = new ListViewItem();
             ListViewItem.ListViewSubItem size = new ListViewItem.ListViewSubItem();
@@ -162,21 +164,30 @@ namespace FileManager
             list.Items.Add(lvi);
         }
 
-        //Click`s
+        private void OpenFolderOrFile(ListView list, string path, string extension, Label label, bool showHidden)
+        {
+            if (path == "..")
+            {
+                ShowFoldersAndFiles(list, Directory.GetParent(label.Text).FullName, showHidden, label);
+            }
+            else if (Directory.Exists(Path.Combine(label.Text, path)))
+            {
+                ShowFoldersAndFiles(list, Path.Combine(label.Text, path), showHidden, label);
+            }
+            else if (File.Exists(Path.Combine(label.Text, path) + extension))
+            {
+                Process.Start(Path.Combine(label.Text, path) + extension);
+            }
+        }
+        //---
+
+        //+++ Click`s
         private void listLeft_DoubleClick(object sender, EventArgs e)
         {
-            if(((ListView)sender).FocusedItem.Text == "..")
-            {
-                ShowFoldersAndFiles(leftList, Directory.GetParent(labelPathLeft.Text).FullName, leftStatusShowHidden, labelPathLeft);
-            }
-            else if (Directory.Exists(Path.Combine(labelPathLeft.Text, ((ListView)sender).FocusedItem.Text)))
-            {
-                ShowFoldersAndFiles(leftList, Path.Combine(labelPathLeft.Text, ((ListView)sender).FocusedItem.Text), leftStatusShowHidden, labelPathLeft);
-            }
-            else if (File.Exists(Path.Combine(labelPathLeft.Text, ((ListView)sender).FocusedItem.Text) + leftList.FocusedItem.SubItems[1].Text))
-            {
-                Process.Start(Path.Combine(labelPathLeft.Text, ((ListView)sender).FocusedItem.Text) + leftList.FocusedItem.SubItems[1].Text);
-            }
+            string pathToFolderOrFile = ((ListView)sender).FocusedItem.Text;
+            string extensionFile = ((ListView)sender).FocusedItem.SubItems[1].Text;
+
+            OpenFolderOrFile(leftList, pathToFolderOrFile, extensionFile, labelPathLeft, leftStatusShowHidden);
         }
 
         private void toolDetails_Click(object sender, EventArgs e)
@@ -238,16 +249,6 @@ namespace FileManager
             }
         }
 
-        private void toolStripRAR_Click(object sender, EventArgs e)
-        {
-            bool isCompressed = File.GetAttributes(Path.Combine(labelPathLeft.Text, leftList.FocusedItem.Text) + leftList.FocusedItem.SubItems[1].Text).HasFlag(FileAttributes.Compressed);
-
-            if (isCompressed)
-            {
-
-            } 
-        }
-
         private void toolStripRefresh_Click(object sender, EventArgs e)
         {
             if(labelPathLeft.Text != String.Empty)
@@ -262,17 +263,59 @@ namespace FileManager
 
         private void rightList_DoubleClick(object sender, EventArgs e)
         {
-            if (((ListView)sender).FocusedItem.Text == "..")
+            string pathToFolderOrFile = ((ListView)sender).FocusedItem.Text;
+            string extensionFile = ((ListView)sender).FocusedItem.SubItems[1].Text;
+
+            OpenFolderOrFile(rightList, pathToFolderOrFile, extensionFile, labelPathRight, rightStatusShowHidden);
+        }
+
+        private void fileOpen_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog oFD = new OpenFileDialog();
+            oFD.ShowDialog();
+            if(oFD.FileName != String.Empty)
             {
-                ShowFoldersAndFiles(rightList, Directory.GetParent(labelPathRight.Text).FullName, rightStatusShowHidden, labelPathRight);
+                Process.Start(oFD.FileName);
             }
-            else if (Directory.Exists(Path.Combine(labelPathRight.Text, ((ListView)sender).FocusedItem.Text)))
+        }
+
+        private void leftList_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
             {
-                ShowFoldersAndFiles(rightList, Path.Combine(labelPathRight.Text, ((ListView)sender).FocusedItem.Text), rightStatusShowHidden, labelPathRight);
+                string pathToFolderOrFile = ((ListView)sender).FocusedItem.Text;
+                string extensionFile = ((ListView)sender).FocusedItem.SubItems[1].Text;
+
+                OpenFolderOrFile(leftList, pathToFolderOrFile, extensionFile, labelPathLeft, leftStatusShowHidden);
             }
-            else if (File.Exists(Path.Combine(labelPathRight.Text, ((ListView)sender).FocusedItem.Text) + rightList.FocusedItem.SubItems[1].Text))
+        }
+
+        private void rightList_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
             {
-                Process.Start(Path.Combine(labelPathRight.Text, ((ListView)sender).FocusedItem.Text) + rightList.FocusedItem.SubItems[1].Text);
+                string pathToFolderOrFile = ((ListView)sender).FocusedItem.Text;
+                string extensionFile = ((ListView)sender).FocusedItem.SubItems[1].Text;
+
+                OpenFolderOrFile(rightList, pathToFolderOrFile, extensionFile, labelPathRight, rightStatusShowHidden);
+            }
+        }
+
+        private void toolStripZIP_Click(object sender, EventArgs e)
+        {
+            if (leftList.Focused)
+            {
+
+            }
+            bool isCompressed = File.GetAttributes(Path.Combine(labelPathLeft.Text, leftList.FocusedItem.Text) + leftList.FocusedItem.SubItems[1].Text).HasFlag(FileAttributes.Compressed);
+
+            if (isCompressed)
+            {
+                //ZipFile.
+            }
+            else if (!isCompressed)
+            {
+
             }
         }
     }
