@@ -7,7 +7,6 @@ D:\Работа\C#\Projects\FileManager\FileManager\FileManager\obj\Debug\FileMa
 D:\Работа\C#\Projects\FileManager\FileManager\FileManager\obj\Debug\FileManager.exe
 D:\Работа\C#\Projects\FileManager\FileManager\FileManager\obj\Debug\FileManager.pdb
 D:\Работа\C#\Projects\FileManager\FileManager\FileManager\obj\Debug\FileManager.csprojResolveAssemblyReference.cache
-C:\VS\FileManager\FileManager\obj\Debug\FileManager.MainForm.resources
 C:\VS\FileManager\FileManager\obj\Debug\FileManager.csproj.GenerateResource.Cache
 C:\VS\FileManager\FileManager\obj\Debug\FileFoxManager.Properties.Resources.resources
 C:\VS\FileManager\FileManager\bin\Debug\FileFox Manager.exe.config
@@ -15,4 +14,4 @@ C:\VS\FileManager\FileManager\bin\Debug\FileFox Manager.exe
 C:\VS\FileManager\FileManager\bin\Debug\FileFox Manager.pdb
 C:\VS\FileManager\FileManager\obj\Debug\FileFox Manager.exe
 C:\VS\FileManager\FileManager\obj\Debug\FileFox Manager.pdb
-C:\VS\FileManager\FileManager\obj\Debug\FileManager.csprojResolveAssemblyReference.cache
+C:\VS\FileManager\FileManager\obj\Debug\FileFoxManager.MainForm.resources

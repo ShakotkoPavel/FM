@@ -1,23 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 
-namespace FileManager
+namespace FileFoxManager
 {
     public partial class MainForm : Form
     {
         private DriveInfo[] arrayDrivesInfo;
-        private bool leftStatusShowHidden = false;   //отображаються или нет скрытые файлы
-        private bool rightStatusShowHidden = false;
+        private bool LeftStatusShowHidden { get; set; } = false; //отображаються или нет скрытые файлы
+        private bool RightStatusShowHidden { get; set; } = false;
+        private ItemComparer LeftItemComparer { get; set; } //сортировка столбцов
+        private ItemComparer RightItemComparer { get; set; }
 
         public MainForm()
         {
@@ -27,10 +22,30 @@ namespace FileManager
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-           foreach(DriveInfo drive in arrayDrivesInfo)
+            LeftItemComparer = new ItemComparer();
+            leftList.ListViewItemSorter = LeftItemComparer;
+
+            RightItemComparer = new ItemComparer();
+            rightList.ListViewItemSorter = RightItemComparer;
+
+            Text = $"{Environment.UserName} - {Text}"; 
+            foreach (DriveInfo drive in arrayDrivesInfo)
             {
                 driveLeft.Items.Add($"[{drive.Name}]");
                 driveRight.Items.Add($"[{drive.Name}]");
+                if (drive.IsReady)
+                {
+                    if(driveLeft.SelectedItem == null)
+                    {
+                        driveLeft.SelectedItem = $"[{drive.Name}]";
+                        ShowInformation(driveLeft, drive, infoDriveLeft, leftList, drive.Name, labelPathLeft, LeftStatusShowHidden);
+                    }
+                    if (driveRight.SelectedItem == null)
+                    {
+                        driveRight.SelectedItem = $"[{drive.Name}]";
+                        ShowInformation(driveRight, drive, infoDriveRight, rightList, drive.Name, labelPathRight, RightStatusShowHidden);
+                    }
+                }
             }
         }
 
@@ -39,7 +54,7 @@ namespace FileManager
             DriveInfo driveInfo = (DriveInfo)arrayDrivesInfo.GetValue(((ComboBox)sender).SelectedIndex);
             labelPathLeft.Text = driveInfo.RootDirectory.FullName;
 
-            ShowInformation(driveLeft, driveInfo, infoDriveLeft, leftList, labelPathLeft.Text, labelPathLeft, leftStatusShowHidden);
+            ShowInformation(driveLeft, driveInfo, infoDriveLeft, leftList, labelPathLeft.Text, labelPathLeft, LeftStatusShowHidden);
         }
 
         private void driveRight_SelectionChangeCommitted(object sender, EventArgs e)
@@ -47,7 +62,7 @@ namespace FileManager
             DriveInfo driveInfo = (DriveInfo)arrayDrivesInfo.GetValue(((ComboBox)sender).SelectedIndex);
             labelPathRight.Text = driveInfo.RootDirectory.FullName;
 
-            ShowInformation(driveRight, driveInfo, infoDriveRight, rightList, labelPathRight.Text, labelPathRight, rightStatusShowHidden);
+            ShowInformation(driveRight, driveInfo, infoDriveRight, rightList, labelPathRight.Text, labelPathRight, RightStatusShowHidden);
         }
 
         //+++ Common methods
@@ -112,11 +127,14 @@ namespace FileManager
         private void AddFolderToList(DirectoryInfo dir, ListView list)
         {
             ListViewItem lvi = new ListViewItem();
+            ListViewItem.ListViewSubItem type = new ListViewItem.ListViewSubItem();
             ListViewItem.ListViewSubItem size = new ListViewItem.ListViewSubItem();
-            lvi.Text = dir.Name;
+            lvi.Text = $"[{dir.Name}]";
             lvi.ForeColor = dir.Attributes.HasFlag(FileAttributes.Hidden) ? SystemColors.ControlDark : SystemColors.WindowText;
             lvi.ImageIndex = dir.Attributes.HasFlag(FileAttributes.System) ? 1 : 0;
+            type.Text = "";
             size.Text = "<папка>";
+            lvi.SubItems.Add(type);
             lvi.SubItems.Add(size);
             list.Items.Add(lvi);
         }
@@ -156,10 +174,13 @@ namespace FileManager
         private void AddRootDirectory(ListView list)
         {
             ListViewItem lvi = new ListViewItem();
+            ListViewItem.ListViewSubItem type = new ListViewItem.ListViewSubItem();
             ListViewItem.ListViewSubItem size = new ListViewItem.ListViewSubItem();
-            lvi.Text = "..";
+            lvi.Text = "[..]";
             lvi.ImageIndex = 4;
-            size.Text = "<папка>";
+            size.Text = "";
+            type.Text = "";
+            lvi.SubItems.Add(type);
             lvi.SubItems.Add(size);
             list.Items.Add(lvi);
         }
@@ -184,10 +205,18 @@ namespace FileManager
         //+++ Click`s
         private void listLeft_DoubleClick(object sender, EventArgs e)
         {
-            string pathToFolderOrFile = ((ListView)sender).FocusedItem.Text;
+            string pathToFolderOrFile = ((ListView)sender).FocusedItem.Text.Trim(new char[] { '[', ']' });
             string extensionFile = ((ListView)sender).FocusedItem.SubItems[1].Text;
 
-            OpenFolderOrFile(leftList, pathToFolderOrFile, extensionFile, labelPathLeft, leftStatusShowHidden);
+            OpenFolderOrFile(leftList, pathToFolderOrFile, extensionFile, labelPathLeft, LeftStatusShowHidden);
+        }
+
+        private void rightList_DoubleClick(object sender, EventArgs e)
+        {
+            string pathToFolderOrFile = ((ListView)sender).FocusedItem.Text.Trim(new char[] { '[', ']' });
+            string extensionFile = ((ListView)sender).FocusedItem.SubItems[1].Text;
+
+            OpenFolderOrFile(rightList, pathToFolderOrFile, extensionFile, labelPathRight, RightStatusShowHidden);
         }
 
         private void toolDetails_Click(object sender, EventArgs e)
@@ -214,13 +243,13 @@ namespace FileManager
         {
             if (leftList.Focused)
             {
-                leftStatusShowHidden = !leftStatusShowHidden;
-                ShowFoldersAndFiles(leftList, labelPathLeft.Text, leftStatusShowHidden, labelPathLeft);
+                LeftStatusShowHidden = !LeftStatusShowHidden;
+                ShowFoldersAndFiles(leftList, labelPathLeft.Text, LeftStatusShowHidden, labelPathLeft);
             }
             if (rightList.Focused)
             {
-                rightStatusShowHidden = !rightStatusShowHidden;
-                ShowFoldersAndFiles(rightList, labelPathRight.Text, rightStatusShowHidden, labelPathRight);
+                RightStatusShowHidden = !RightStatusShowHidden;
+                ShowFoldersAndFiles(rightList, labelPathRight.Text, RightStatusShowHidden, labelPathRight);
             }
         }
 
@@ -253,20 +282,12 @@ namespace FileManager
         {
             if(labelPathLeft.Text != String.Empty)
             {
-                ShowFoldersAndFiles(leftList, labelPathLeft.Text, leftStatusShowHidden, labelPathLeft);
+                ShowFoldersAndFiles(leftList, labelPathLeft.Text, LeftStatusShowHidden, labelPathLeft);
             }
             if (labelPathRight.Text != String.Empty)
             {
-                ShowFoldersAndFiles(rightList, labelPathRight.Text, rightStatusShowHidden, labelPathRight);
+                ShowFoldersAndFiles(rightList, labelPathRight.Text, RightStatusShowHidden, labelPathRight);
             }
-        }
-
-        private void rightList_DoubleClick(object sender, EventArgs e)
-        {
-            string pathToFolderOrFile = ((ListView)sender).FocusedItem.Text;
-            string extensionFile = ((ListView)sender).FocusedItem.SubItems[1].Text;
-
-            OpenFolderOrFile(rightList, pathToFolderOrFile, extensionFile, labelPathRight, rightStatusShowHidden);
         }
 
         private void fileOpen_Click(object sender, EventArgs e)
@@ -286,7 +307,7 @@ namespace FileManager
                 string pathToFolderOrFile = ((ListView)sender).FocusedItem.Text;
                 string extensionFile = ((ListView)sender).FocusedItem.SubItems[1].Text;
 
-                OpenFolderOrFile(leftList, pathToFolderOrFile, extensionFile, labelPathLeft, leftStatusShowHidden);
+                OpenFolderOrFile(leftList, pathToFolderOrFile, extensionFile, labelPathLeft, LeftStatusShowHidden);
             }
         }
 
@@ -297,26 +318,57 @@ namespace FileManager
                 string pathToFolderOrFile = ((ListView)sender).FocusedItem.Text;
                 string extensionFile = ((ListView)sender).FocusedItem.SubItems[1].Text;
 
-                OpenFolderOrFile(rightList, pathToFolderOrFile, extensionFile, labelPathRight, rightStatusShowHidden);
+                OpenFolderOrFile(rightList, pathToFolderOrFile, extensionFile, labelPathRight, RightStatusShowHidden);
             }
         }
 
         private void toolStripZIP_Click(object sender, EventArgs e)
         {
+            bool isCompressed = false;
+            string commonPath = "", 
+                   nameFolderOrFile = "", 
+                   extension = "";
+
             if (leftList.Focused)
             {
-
+                commonPath = labelPathLeft.Text;
+                nameFolderOrFile = leftList.FocusedItem.Text.Trim(new char[] { '[', ']' });
+                extension = leftList.FocusedItem.SubItems[1].Text;
             }
-            bool isCompressed = File.GetAttributes(Path.Combine(labelPathLeft.Text, leftList.FocusedItem.Text) + leftList.FocusedItem.SubItems[1].Text).HasFlag(FileAttributes.Compressed);
+            else if(rightList.Focused)
+            {
+                commonPath = labelPathRight.Text;
+                nameFolderOrFile = rightList.FocusedItem.Text.Trim(new char[] { '[', ']' });
+                extension = rightList.FocusedItem.SubItems[1].Text;
+            }
+
+            string path = Path.Combine(commonPath, nameFolderOrFile + extension);
+
+            if(path != String.Empty)
+            {
+                isCompressed = File.GetAttributes(path).HasFlag(FileAttributes.Compressed);
+            }
 
             if (isCompressed)
             {
                 //ZipFile.
             }
-            else if (!isCompressed)
+            else
             {
-
+                //ZipFile.
             }
+        }
+
+        private void leftList_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            LeftItemComparer.ColumnIndex = e.Column;
+            ((ListView)sender).Sort();
+        }
+
+        private void rightList_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            RightItemComparer.ColumnIndex = e.Column;
+            ((ListView)sender).Sort();
         }
     }
 }
