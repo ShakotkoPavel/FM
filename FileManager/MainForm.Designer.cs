@@ -70,7 +70,7 @@
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.labelPathRight = new System.Windows.Forms.Label();
             this.tableLayoutPanel5 = new System.Windows.Forms.TableLayoutPanel();
-            this.button1 = new System.Windows.Forms.Button();
+            this.buttonView = new System.Windows.Forms.Button();
             this.buttonChange = new System.Windows.Forms.Button();
             this.buttonCopy = new System.Windows.Forms.Button();
             this.buttonMove = new System.Windows.Forms.Button();
@@ -530,7 +530,7 @@
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 14.28571F));
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 14.28571F));
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 14.28571F));
-            this.tableLayoutPanel5.Controls.Add(this.button1, 0, 0);
+            this.tableLayoutPanel5.Controls.Add(this.buttonView, 0, 0);
             this.tableLayoutPanel5.Controls.Add(this.buttonChange, 1, 0);
             this.tableLayoutPanel5.Controls.Add(this.buttonCopy, 2, 0);
             this.tableLayoutPanel5.Controls.Add(this.buttonMove, 3, 0);
@@ -546,16 +546,16 @@
             this.tableLayoutPanel5.Size = new System.Drawing.Size(880, 37);
             this.tableLayoutPanel5.TabIndex = 1;
             // 
-            // button1
+            // buttonView
             // 
-            this.button1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.button1.Location = new System.Drawing.Point(0, 3);
-            this.button1.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(125, 31);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "F3 Просмотр";
-            this.button1.UseVisualStyleBackColor = true;
+            this.buttonView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.buttonView.Location = new System.Drawing.Point(0, 3);
+            this.buttonView.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
+            this.buttonView.Name = "buttonView";
+            this.buttonView.Size = new System.Drawing.Size(125, 31);
+            this.buttonView.TabIndex = 0;
+            this.buttonView.Text = "F3 Просмотр";
+            this.buttonView.UseVisualStyleBackColor = true;
             // 
             // buttonChange
             // 
@@ -710,7 +710,7 @@
         private System.Windows.Forms.ColumnHeader columnHeader3;
         private System.Windows.Forms.Label labelPathRight;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel5;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button buttonView;
         private System.Windows.Forms.Button buttonChange;
         private System.Windows.Forms.Button buttonCopy;
         private System.Windows.Forms.Button buttonMove;

@@ -3,6 +3,10 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
+using System.ComponentModel;
+using System.Text;
+//using ICSharpCode.SharpZipLib.Zip;
 
 namespace FileFoxManager
 {
@@ -197,7 +201,14 @@ namespace FileFoxManager
             }
             else if (File.Exists(Path.Combine(label.Text, path) + extension))
             {
-                Process.Start(Path.Combine(label.Text, path) + extension);
+                try
+                {
+                    Process.Start(Path.Combine(label.Text, path) + extension);
+                }
+                catch(Win32Exception e)
+                {
+                    //ничего не делаем, просто перехватываем ex, чтобы не падало приложение
+                }
             }
         }
         //---
@@ -280,14 +291,14 @@ namespace FileFoxManager
 
         private void toolStripRefresh_Click(object sender, EventArgs e)
         {
-            if(labelPathLeft.Text != String.Empty)
-            {
+            //if(labelPathLeft.Text != String.Empty)
+            //{
                 ShowFoldersAndFiles(leftList, labelPathLeft.Text, LeftStatusShowHidden, labelPathLeft);
-            }
-            if (labelPathRight.Text != String.Empty)
-            {
+            //}
+            //if (labelPathRight.Text != String.Empty)
+            //{
                 ShowFoldersAndFiles(rightList, labelPathRight.Text, RightStatusShowHidden, labelPathRight);
-            }
+            //}
         }
 
         private void fileOpen_Click(object sender, EventArgs e)
@@ -304,7 +315,7 @@ namespace FileFoxManager
         {
             if (e.KeyCode == Keys.Enter)
             {
-                string pathToFolderOrFile = ((ListView)sender).FocusedItem.Text;
+                string pathToFolderOrFile = ((ListView)sender).FocusedItem.Text.Trim(new char[] { '[', ']' });
                 string extensionFile = ((ListView)sender).FocusedItem.SubItems[1].Text;
 
                 OpenFolderOrFile(leftList, pathToFolderOrFile, extensionFile, labelPathLeft, LeftStatusShowHidden);
@@ -315,7 +326,7 @@ namespace FileFoxManager
         {
             if (e.KeyCode == Keys.Enter)
             {
-                string pathToFolderOrFile = ((ListView)sender).FocusedItem.Text;
+                string pathToFolderOrFile = ((ListView)sender).FocusedItem.Text.Trim(new char[] { '[', ']' });
                 string extensionFile = ((ListView)sender).FocusedItem.SubItems[1].Text;
 
                 OpenFolderOrFile(rightList, pathToFolderOrFile, extensionFile, labelPathRight, RightStatusShowHidden);
@@ -324,10 +335,12 @@ namespace FileFoxManager
 
         private void toolStripZIP_Click(object sender, EventArgs e)
         {
-            bool isCompressed = false;
+            bool isArchive = false;
             string commonPath = "", 
                    nameFolderOrFile = "", 
                    extension = "";
+
+            if(leftList.SelectedItems.Count > 1)
 
             if (leftList.Focused)
             {
@@ -335,7 +348,7 @@ namespace FileFoxManager
                 nameFolderOrFile = leftList.FocusedItem.Text.Trim(new char[] { '[', ']' });
                 extension = leftList.FocusedItem.SubItems[1].Text;
             }
-            else if(rightList.Focused)
+            else if (rightList.Focused)
             {
                 commonPath = labelPathRight.Text;
                 nameFolderOrFile = rightList.FocusedItem.Text.Trim(new char[] { '[', ']' });
@@ -346,16 +359,31 @@ namespace FileFoxManager
 
             if(path != String.Empty)
             {
-                isCompressed = File.GetAttributes(path).HasFlag(FileAttributes.Compressed);
+                isArchive = File.GetAttributes(path).HasFlag(FileAttributes.Archive);
             }
 
-            if (isCompressed)
+            FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
+            folderBrowserDialog.RootFolder = Environment.SpecialFolder.MyComputer;
+            folderBrowserDialog.Description = "Выберите каталог";
+            folderBrowserDialog.ShowNewFolderButton = true;
+            DialogResult result = folderBrowserDialog.ShowDialog();
+
+            if (result == DialogResult.OK)
             {
-                //ZipFile.
-            }
-            else
-            {
-                //ZipFile.
+                if (isArchive)
+                {
+                    using (ZipArchive zip = ZipFile.Open(path, ZipArchiveMode.Read, Encoding.GetEncoding(866)))
+                    {
+                        foreach (ZipArchiveEntry zipEntry in zip.Entries)
+                        {
+                            zipEntry.ExtractToFile(Path.Combine(folderBrowserDialog.SelectedPath, zipEntry.FullName), true);
+                        }
+                    }
+                }
+                else
+                {
+                    ZipArchive
+                }
             }
         }
 

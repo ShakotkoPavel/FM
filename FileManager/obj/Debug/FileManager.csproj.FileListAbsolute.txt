@@ -15,3 +15,4 @@ C:\VS\FileManager\FileManager\bin\Debug\FileFox Manager.pdb
 C:\VS\FileManager\FileManager\obj\Debug\FileFox Manager.exe
 C:\VS\FileManager\FileManager\obj\Debug\FileFox Manager.pdb
 C:\VS\FileManager\FileManager\obj\Debug\FileFoxManager.MainForm.resources
+C:\VS\FileManager\FileManager\bin\Debug\ICSharpCode.SharpZipLib.dll
