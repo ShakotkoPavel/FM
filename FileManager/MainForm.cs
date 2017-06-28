@@ -6,22 +6,24 @@ using System.IO;
 using System.IO.Compression;
 using System.ComponentModel;
 using System.Text;
+using System.Collections.Generic;
+using Microsoft.VisualBasic;
 //using ICSharpCode.SharpZipLib.Zip;
 
 namespace FileFoxManager
 {
     public partial class MainForm : Form
     {
-        private DriveInfo[] arrayDrivesInfo;
-        private bool LeftStatusShowHidden { get; set; } = false; //отображаються или нет скрытые файлы
-        private bool RightStatusShowHidden { get; set; } = false;
-        private ItemComparer LeftItemComparer { get; set; } //сортировка столбцов
-        private ItemComparer RightItemComparer { get; set; }
+        DriveInfo[] ArrayDrivesInfo { get; set; }
+        bool LeftStatusShowHidden { get; set; } = false; //отображаються или нет скрытые файлы
+        bool RightStatusShowHidden { get; set; } = false;
+        ItemComparer LeftItemComparer { get; set; } //сортировка столбцов
+        ItemComparer RightItemComparer { get; set; }
 
         public MainForm()
         {
             InitializeComponent();
-            arrayDrivesInfo = DriveInfo.GetDrives();
+            ArrayDrivesInfo = DriveInfo.GetDrives();
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -32,14 +34,14 @@ namespace FileFoxManager
             RightItemComparer = new ItemComparer();
             rightList.ListViewItemSorter = RightItemComparer;
 
-            Text = $"{Environment.UserName} - {Text}"; 
-            foreach (DriveInfo drive in arrayDrivesInfo)
+            Text = $"{Environment.UserName} - {Text}";
+            foreach (DriveInfo drive in ArrayDrivesInfo)
             {
                 driveLeft.Items.Add($"[{drive.Name}]");
                 driveRight.Items.Add($"[{drive.Name}]");
                 if (drive.IsReady)
                 {
-                    if(driveLeft.SelectedItem == null)
+                    if (driveLeft.SelectedItem == null)
                     {
                         driveLeft.SelectedItem = $"[{drive.Name}]";
                         ShowInformation(driveLeft, drive, infoDriveLeft, leftList, drive.Name, labelPathLeft, LeftStatusShowHidden);
@@ -53,17 +55,17 @@ namespace FileFoxManager
             }
         }
 
-        private void driveLeft_SelectionChangeCommitted(object sender, EventArgs e)
+        private void DriveLeft_SelectionChangeCommitted(object sender, EventArgs e)
         {
-            DriveInfo driveInfo = (DriveInfo)arrayDrivesInfo.GetValue(((ComboBox)sender).SelectedIndex);
+            DriveInfo driveInfo = (DriveInfo)ArrayDrivesInfo.GetValue(((ComboBox)sender).SelectedIndex);
             labelPathLeft.Text = driveInfo.RootDirectory.FullName;
 
             ShowInformation(driveLeft, driveInfo, infoDriveLeft, leftList, labelPathLeft.Text, labelPathLeft, LeftStatusShowHidden);
         }
 
-        private void driveRight_SelectionChangeCommitted(object sender, EventArgs e)
+        private void DriveRight_SelectionChangeCommitted(object sender, EventArgs e)
         {
-            DriveInfo driveInfo = (DriveInfo)arrayDrivesInfo.GetValue(((ComboBox)sender).SelectedIndex);
+            DriveInfo driveInfo = (DriveInfo)ArrayDrivesInfo.GetValue(((ComboBox)sender).SelectedIndex);
             labelPathRight.Text = driveInfo.RootDirectory.FullName;
 
             ShowInformation(driveRight, driveInfo, infoDriveRight, rightList, labelPathRight.Text, labelPathRight, RightStatusShowHidden);
@@ -205,16 +207,90 @@ namespace FileFoxManager
                 {
                     Process.Start(Path.Combine(label.Text, path) + extension);
                 }
-                catch(Win32Exception e)
+                catch (Win32Exception e)
                 {
                     //ничего не делаем, просто перехватываем ex, чтобы не падало приложение
                 }
             }
         }
+
+        private void ZipUnZip(bool Zip)
+        {
+            string commonPath = "",
+                   nameFolderOrFile = "",
+                   extension = "";
+            List<string> listPaths = new List<string>();
+            ListView list = null;
+
+            if (leftList.Focused)
+            {
+                list = leftList;
+                commonPath = labelPathLeft.Text;
+            }
+            else if (rightList.Focused)
+            {
+                list = rightList;
+                commonPath = labelPathRight.Text;
+            }
+            if (list != null && commonPath != String.Empty)
+                foreach (ListViewItem item in list.SelectedItems)
+                {
+                    nameFolderOrFile = item.Text.Trim(new char[] { '[', ']' });
+                    extension = item.SubItems[1].Text;
+                    if (nameFolderOrFile != "..")
+                    {
+                        listPaths.Add(Path.Combine(commonPath, nameFolderOrFile + extension));
+                    }
+                }
+
+            FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog()
+            {
+                RootFolder = Environment.SpecialFolder.MyComputer,
+                Description = "Выберите каталог",
+                ShowNewFolderButton = true
+            };
+            DialogResult result = folderBrowserDialog.ShowDialog();
+
+            if (result == DialogResult.OK)
+            {
+                foreach (string path in listPaths)
+                {
+                    if (Zip)
+                    {
+                        string nameZip = Interaction.InputBox("Введите имя архива", "Ввод имени архива");
+                        if(nameZip != String.Empty)
+                        {
+                            ZipFile.CreateFromDirectory(commonPath, DeleteInvalidCharInFileName(nameZip), CompressionLevel.Fastest, false, Encoding.GetEncoding(866));
+                        }
+                    }
+                    else
+                    {
+                        using (ZipArchive zip = ZipFile.Open(path, ZipArchiveMode.Read, Encoding.GetEncoding(866)))
+                        {
+
+                            foreach (ZipArchiveEntry zipEntry in zip.Entries)
+                            {
+                                zipEntry.ExtractToFile(Path.Combine(folderBrowserDialog.SelectedPath, zipEntry.FullName), true);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private string DeleteInvalidCharInFileName(string fileName)
+        {
+            char[] invalidFileChars = Path.GetInvalidFileNameChars();
+            foreach (char ch in invalidFileChars)
+            {
+                fileName = fileName.Replace(ch, ' ');
+            }
+            return fileName;
+        }
         //---
 
         //+++ Click`s
-        private void listLeft_DoubleClick(object sender, EventArgs e)
+        private void ListLeft_DoubleClick(object sender, EventArgs e)
         {
             string pathToFolderOrFile = ((ListView)sender).FocusedItem.Text.Trim(new char[] { '[', ']' });
             string extensionFile = ((ListView)sender).FocusedItem.SubItems[1].Text;
@@ -222,7 +298,7 @@ namespace FileFoxManager
             OpenFolderOrFile(leftList, pathToFolderOrFile, extensionFile, labelPathLeft, LeftStatusShowHidden);
         }
 
-        private void rightList_DoubleClick(object sender, EventArgs e)
+        private void RightList_DoubleClick(object sender, EventArgs e)
         {
             string pathToFolderOrFile = ((ListView)sender).FocusedItem.Text.Trim(new char[] { '[', ']' });
             string extensionFile = ((ListView)sender).FocusedItem.SubItems[1].Text;
@@ -230,27 +306,27 @@ namespace FileFoxManager
             OpenFolderOrFile(rightList, pathToFolderOrFile, extensionFile, labelPathRight, RightStatusShowHidden);
         }
 
-        private void toolDetails_Click(object sender, EventArgs e)
+        private void ToolDetails_Click(object sender, EventArgs e)
         {
             ChangeListView(View.Details);
         }
 
-        private void toolList_Click(object sender, EventArgs e)
+        private void ToolList_Click(object sender, EventArgs e)
         {
             ChangeListView(View.List);
         }
 
-        private void toolSmall_Click(object sender, EventArgs e)
+        private void ToolSmall_Click(object sender, EventArgs e)
         {
             ChangeListView(View.SmallIcon);
         }
 
-        private void toolLarge_Click(object sender, EventArgs e)
+        private void ToolLarge_Click(object sender, EventArgs e)
         {
             ChangeListView(View.LargeIcon);
         }
 
-        private void toolViewHiddenFiles_Click(object sender, EventArgs e)
+        private void ToolViewHiddenFiles_Click(object sender, EventArgs e)
         {
             if (leftList.Focused)
             {
@@ -269,7 +345,7 @@ namespace FileFoxManager
             this.Close();
         }
 
-        private void toolStripNoterpad_Click(object sender, EventArgs e)
+        private void ToolStripNoterpad_Click(object sender, EventArgs e)
         {
             string path = @"C:\Windows\System32\notepad.exe";
             try
@@ -289,7 +365,7 @@ namespace FileFoxManager
             }
         }
 
-        private void toolStripRefresh_Click(object sender, EventArgs e)
+        private void ToolStripRefresh_Click(object sender, EventArgs e)
         {
             //if(labelPathLeft.Text != String.Empty)
             //{
@@ -301,7 +377,7 @@ namespace FileFoxManager
             //}
         }
 
-        private void fileOpen_Click(object sender, EventArgs e)
+        private void FileOpen_Click(object sender, EventArgs e)
         {
             OpenFileDialog oFD = new OpenFileDialog();
             oFD.ShowDialog();
@@ -311,7 +387,7 @@ namespace FileFoxManager
             }
         }
 
-        private void leftList_KeyDown(object sender, KeyEventArgs e)
+        private void LeftList_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
@@ -322,7 +398,7 @@ namespace FileFoxManager
             }
         }
 
-        private void rightList_KeyDown(object sender, KeyEventArgs e)
+        private void RightList_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
@@ -333,70 +409,27 @@ namespace FileFoxManager
             }
         }
 
-        private void toolStripZIP_Click(object sender, EventArgs e)
+        private void ToolStripZIP_Click(object sender, EventArgs e)
         {
-            bool isArchive = false;
-            string commonPath = "", 
-                   nameFolderOrFile = "", 
-                   extension = "";
-
-            if(leftList.SelectedItems.Count > 1)
-
-            if (leftList.Focused)
-            {
-                commonPath = labelPathLeft.Text;
-                nameFolderOrFile = leftList.FocusedItem.Text.Trim(new char[] { '[', ']' });
-                extension = leftList.FocusedItem.SubItems[1].Text;
-            }
-            else if (rightList.Focused)
-            {
-                commonPath = labelPathRight.Text;
-                nameFolderOrFile = rightList.FocusedItem.Text.Trim(new char[] { '[', ']' });
-                extension = rightList.FocusedItem.SubItems[1].Text;
-            }
-
-            string path = Path.Combine(commonPath, nameFolderOrFile + extension);
-
-            if(path != String.Empty)
-            {
-                isArchive = File.GetAttributes(path).HasFlag(FileAttributes.Archive);
-            }
-
-            FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
-            folderBrowserDialog.RootFolder = Environment.SpecialFolder.MyComputer;
-            folderBrowserDialog.Description = "Выберите каталог";
-            folderBrowserDialog.ShowNewFolderButton = true;
-            DialogResult result = folderBrowserDialog.ShowDialog();
-
-            if (result == DialogResult.OK)
-            {
-                if (isArchive)
-                {
-                    using (ZipArchive zip = ZipFile.Open(path, ZipArchiveMode.Read, Encoding.GetEncoding(866)))
-                    {
-                        foreach (ZipArchiveEntry zipEntry in zip.Entries)
-                        {
-                            zipEntry.ExtractToFile(Path.Combine(folderBrowserDialog.SelectedPath, zipEntry.FullName), true);
-                        }
-                    }
-                }
-                else
-                {
-                    ZipArchive
-                }
-            }
+            ZipUnZip(true);
         }
 
-        private void leftList_ColumnClick(object sender, ColumnClickEventArgs e)
+        private void ToolStripUnZip_Click(object sender, EventArgs e)
+        {
+            ZipUnZip(false);
+        }
+
+        private void LeftList_ColumnClick(object sender, ColumnClickEventArgs e)
         {
             LeftItemComparer.ColumnIndex = e.Column;
             ((ListView)sender).Sort();
         }
 
-        private void rightList_ColumnClick(object sender, ColumnClickEventArgs e)
+        private void RightList_ColumnClick(object sender, ColumnClickEventArgs e)
         {
             RightItemComparer.ColumnIndex = e.Column;
             ((ListView)sender).Sort();
         }
+
     }
 }

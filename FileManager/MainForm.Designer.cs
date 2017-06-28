@@ -41,6 +41,7 @@
             this.toolViewHiddenFiles = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripZIP = new System.Windows.Forms.ToolStripButton();
+            this.toolStripUnZip = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.toolLarge = new System.Windows.Forms.ToolStripButton();
             this.toolSmall = new System.Windows.Forms.ToolStripButton();
@@ -119,7 +120,7 @@
             this.fileOpen.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
             this.fileOpen.Size = new System.Drawing.Size(164, 22);
             this.fileOpen.Text = "Открыть";
-            this.fileOpen.Click += new System.EventHandler(this.fileOpen_Click);
+            this.fileOpen.Click += new System.EventHandler(this.FileOpen_Click);
             // 
             // toolStripSeparator1
             // 
@@ -146,6 +147,7 @@
             this.toolViewHiddenFiles,
             this.toolStripSeparator4,
             this.toolStripZIP,
+            this.toolStripUnZip,
             this.toolStripSeparator3,
             this.toolLarge,
             this.toolSmall,
@@ -169,7 +171,7 @@
             this.toolStripRefresh.Name = "toolStripRefresh";
             this.toolStripRefresh.Size = new System.Drawing.Size(28, 28);
             this.toolStripRefresh.Text = "Обновить";
-            this.toolStripRefresh.Click += new System.EventHandler(this.toolStripRefresh_Click);
+            this.toolStripRefresh.Click += new System.EventHandler(this.ToolStripRefresh_Click);
             // 
             // toolStripSeparator5
             // 
@@ -184,7 +186,7 @@
             this.toolViewHiddenFiles.Name = "toolViewHiddenFiles";
             this.toolViewHiddenFiles.Size = new System.Drawing.Size(28, 28);
             this.toolViewHiddenFiles.Text = "Показать скрытые файлы";
-            this.toolViewHiddenFiles.Click += new System.EventHandler(this.toolViewHiddenFiles_Click);
+            this.toolViewHiddenFiles.Click += new System.EventHandler(this.ToolViewHiddenFiles_Click);
             // 
             // toolStripSeparator4
             // 
@@ -199,7 +201,19 @@
             this.toolStripZIP.Name = "toolStripZIP";
             this.toolStripZIP.Size = new System.Drawing.Size(28, 28);
             this.toolStripZIP.Text = "Создать\\извлечь архив ZIP";
-            this.toolStripZIP.Click += new System.EventHandler(this.toolStripZIP_Click);
+            this.toolStripZIP.ToolTipText = "Создать архив ZIP";
+            this.toolStripZIP.Click += new System.EventHandler(this.ToolStripZIP_Click);
+            // 
+            // toolStripUnZip
+            // 
+            this.toolStripUnZip.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripUnZip.Image = ((System.Drawing.Image)(resources.GetObject("toolStripUnZip.Image")));
+            this.toolStripUnZip.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripUnZip.Name = "toolStripUnZip";
+            this.toolStripUnZip.Size = new System.Drawing.Size(28, 28);
+            this.toolStripUnZip.Text = "toolStripButton1";
+            this.toolStripUnZip.ToolTipText = "Извлечь архив ZIP";
+            this.toolStripUnZip.Click += new System.EventHandler(this.ToolStripUnZip_Click);
             // 
             // toolStripSeparator3
             // 
@@ -214,7 +228,7 @@
             this.toolLarge.Name = "toolLarge";
             this.toolLarge.Size = new System.Drawing.Size(28, 28);
             this.toolLarge.Text = "Крупные значки";
-            this.toolLarge.Click += new System.EventHandler(this.toolLarge_Click);
+            this.toolLarge.Click += new System.EventHandler(this.ToolLarge_Click);
             // 
             // toolSmall
             // 
@@ -224,7 +238,7 @@
             this.toolSmall.Name = "toolSmall";
             this.toolSmall.Size = new System.Drawing.Size(28, 28);
             this.toolSmall.Text = "Мелкие значки";
-            this.toolSmall.Click += new System.EventHandler(this.toolSmall_Click);
+            this.toolSmall.Click += new System.EventHandler(this.ToolSmall_Click);
             // 
             // toolList
             // 
@@ -234,7 +248,7 @@
             this.toolList.Name = "toolList";
             this.toolList.Size = new System.Drawing.Size(28, 28);
             this.toolList.Text = "Список";
-            this.toolList.Click += new System.EventHandler(this.toolList_Click);
+            this.toolList.Click += new System.EventHandler(this.ToolList_Click);
             // 
             // toolDetails
             // 
@@ -244,7 +258,7 @@
             this.toolDetails.Name = "toolDetails";
             this.toolDetails.Size = new System.Drawing.Size(28, 28);
             this.toolDetails.Text = "Подробно";
-            this.toolDetails.Click += new System.EventHandler(this.toolDetails_Click);
+            this.toolDetails.Click += new System.EventHandler(this.ToolDetails_Click);
             // 
             // toolStripSeparator2
             // 
@@ -259,7 +273,7 @@
             this.RunNoterpad.Name = "RunNoterpad";
             this.RunNoterpad.Size = new System.Drawing.Size(28, 28);
             this.RunNoterpad.Text = "Запустить Блокнот";
-            this.RunNoterpad.Click += new System.EventHandler(this.toolStripNoterpad_Click);
+            this.RunNoterpad.Click += new System.EventHandler(this.ToolStripNoterpad_Click);
             // 
             // imageFolders
             // 
@@ -347,7 +361,7 @@
             this.driveLeft.Name = "driveLeft";
             this.driveLeft.Size = new System.Drawing.Size(57, 21);
             this.driveLeft.TabIndex = 11;
-            this.driveLeft.SelectionChangeCommitted += new System.EventHandler(this.driveLeft_SelectionChangeCommitted);
+            this.driveLeft.SelectionChangeCommitted += new System.EventHandler(this.DriveLeft_SelectionChangeCommitted);
             // 
             // infoDriveLeft
             // 
@@ -381,9 +395,9 @@
             this.leftList.TabIndex = 14;
             this.leftList.UseCompatibleStateImageBehavior = false;
             this.leftList.View = System.Windows.Forms.View.Details;
-            this.leftList.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.leftList_ColumnClick);
-            this.leftList.DoubleClick += new System.EventHandler(this.listLeft_DoubleClick);
-            this.leftList.KeyDown += new System.Windows.Forms.KeyEventHandler(this.leftList_KeyDown);
+            this.leftList.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.LeftList_ColumnClick);
+            this.leftList.DoubleClick += new System.EventHandler(this.ListLeft_DoubleClick);
+            this.leftList.KeyDown += new System.Windows.Forms.KeyEventHandler(this.LeftList_KeyDown);
             // 
             // FileName
             // 
@@ -455,7 +469,7 @@
             this.driveRight.Name = "driveRight";
             this.driveRight.Size = new System.Drawing.Size(57, 21);
             this.driveRight.TabIndex = 11;
-            this.driveRight.SelectionChangeCommitted += new System.EventHandler(this.driveRight_SelectionChangeCommitted);
+            this.driveRight.SelectionChangeCommitted += new System.EventHandler(this.DriveRight_SelectionChangeCommitted);
             // 
             // infoDriveRight
             // 
@@ -489,9 +503,9 @@
             this.rightList.TabIndex = 14;
             this.rightList.UseCompatibleStateImageBehavior = false;
             this.rightList.View = System.Windows.Forms.View.Details;
-            this.rightList.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.rightList_ColumnClick);
-            this.rightList.DoubleClick += new System.EventHandler(this.rightList_DoubleClick);
-            this.rightList.KeyDown += new System.Windows.Forms.KeyEventHandler(this.rightList_KeyDown);
+            this.rightList.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.RightList_ColumnClick);
+            this.rightList.DoubleClick += new System.EventHandler(this.RightList_DoubleClick);
+            this.rightList.KeyDown += new System.Windows.Forms.KeyEventHandler(this.RightList_KeyDown);
             // 
             // columnHeader1
             // 
@@ -718,6 +732,7 @@
         private System.Windows.Forms.Button buttonDelete;
         private System.Windows.Forms.Button button7;
         private System.Windows.Forms.ImageList imageSorting;
+        private System.Windows.Forms.ToolStripButton toolStripUnZip;
     }
 }
 
