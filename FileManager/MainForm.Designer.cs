@@ -207,7 +207,7 @@
             // toolStripUnZip
             // 
             this.toolStripUnZip.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripUnZip.Image = ((System.Drawing.Image)(resources.GetObject("toolStripUnZip.Image")));
+            this.toolStripUnZip.Image = global::FileFoxManager.Properties.Resources.extract_archive;
             this.toolStripUnZip.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripUnZip.Name = "toolStripUnZip";
             this.toolStripUnZip.Size = new System.Drawing.Size(28, 28);

@@ -7,8 +7,6 @@ using System.IO.Compression;
 using System.ComponentModel;
 using System.Text;
 using System.Collections.Generic;
-using Microsoft.VisualBasic;
-//using ICSharpCode.SharpZipLib.Zip;
 
 namespace FileFoxManager
 {
@@ -232,7 +230,9 @@ namespace FileFoxManager
                 list = rightList;
                 commonPath = labelPathRight.Text;
             }
+
             if (list != null && commonPath != String.Empty)
+            {
                 foreach (ListViewItem item in list.SelectedItems)
                 {
                     nameFolderOrFile = item.Text.Trim(new char[] { '[', ']' });
@@ -243,34 +243,59 @@ namespace FileFoxManager
                     }
                 }
 
-            FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog()
-            {
-                RootFolder = Environment.SpecialFolder.MyComputer,
-                Description = "Выберите каталог",
-                ShowNewFolderButton = true
-            };
-            DialogResult result = folderBrowserDialog.ShowDialog();
-
-            if (result == DialogResult.OK)
-            {
-                foreach (string path in listPaths)
+                if (Zip) //архивирование
                 {
-                    if (Zip)
+                    SaveFileDialog fileDialog = new SaveFileDialog()
                     {
-                        string nameZip = Interaction.InputBox("Введите имя архива", "Ввод имени архива");
-                        if(nameZip != String.Empty)
+                        Filter = "Zip files (*.zip)|*.zip",
+                        ValidateNames = true,
+                        Title = "Сохранить файл zip...",
+                        CreatePrompt = true,
+                        InitialDirectory = commonPath,
+                        OverwritePrompt = true
+                    };
+                    DialogResult resultFileDialog = fileDialog.ShowDialog();
+
+                    if(resultFileDialog == DialogResult.OK)
+                    {
+                        if (fileDialog.FileName != String.Empty)
                         {
-                            ZipFile.CreateFromDirectory(commonPath, DeleteInvalidCharInFileName(nameZip), CompressionLevel.Fastest, false, Encoding.GetEncoding(866));
+                            using (FileStream fileStream = new FileStream(fileDialog.FileName, FileMode.Create))
+                            {
+                                using (ZipArchive archive = new ZipArchive(fileStream, ZipArchiveMode.Update, false, Encoding.GetEncoding(866)))
+                                {
+                                    foreach (string path in listPaths)
+                                    {
+                                        archive.CreateEntryFromFile(path, Path.GetFileName(path), CompressionLevel.Fastest);
+                                    }
+                                    archive.Dispose();
+                                }
+                                fileStream.Close();
+                            }
                         }
                     }
-                    else
+                }
+                else //извлечение из архива
+                {
+                    FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog()
                     {
-                        using (ZipArchive zip = ZipFile.Open(path, ZipArchiveMode.Read, Encoding.GetEncoding(866)))
-                        {
+                        RootFolder = Environment.SpecialFolder.MyComputer,
+                        Description = "Выберите каталог",
+                        ShowNewFolderButton = true
+                    };
+                    DialogResult result = folderBrowserDialog.ShowDialog();
 
-                            foreach (ZipArchiveEntry zipEntry in zip.Entries)
+                    if (result == DialogResult.OK)
+                    {
+                        foreach(string path in listPaths)
+                        {
+                            using (ZipArchive zip = ZipFile.Open(path, ZipArchiveMode.Update, Encoding.GetEncoding(866)))
                             {
-                                zipEntry.ExtractToFile(Path.Combine(folderBrowserDialog.SelectedPath, zipEntry.FullName), true);
+                                foreach (ZipArchiveEntry zipEntry in zip.Entries)
+                                {
+                                    zipEntry.ExtractToFile(Path.Combine(folderBrowserDialog.SelectedPath, zipEntry.FullName), true);
+                                }
+                                zip.Dispose();
                             }
                         }
                     }
